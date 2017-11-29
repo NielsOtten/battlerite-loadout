@@ -2,6 +2,7 @@
 import React from 'react';
 import express from 'express';
 import compression from 'compression';
+import mongoose from 'mongoose';
 import cache from 'cache-control';
 import { ServerStyleSheet } from 'styled-components';
 import { renderToString } from 'react-dom/server';
@@ -13,6 +14,12 @@ import Root from '../components/Root';
 
 const clientAssets = require(process.env.RAZZLE_ASSETS_MANIFEST);; // eslint-disable-line import/no-dynamic-require
 const app = express();
+
+const mongoURL = process.env.MONGODB_URI || 'mongodb://localhost/battlerite';
+mongoose.Promise = global.Promise;
+mongoose.connect(mongoURL, { useMongoClient: true }, (ignore, connection) => {
+  connection.onOpen();
+}).then(() => { console.info('connected'); }).catch(console.error);
 
 // Remove annoying Express header addition.
 app.disable('x-powered-by');
