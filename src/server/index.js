@@ -1,47 +1,89 @@
-import App from '../components/Root';
+/* eslint-disable */
 import React from 'react';
-import { StaticRouter } from 'react-router-dom';
 import express from 'express';
+import compression from 'compression';
+import cache from 'cache-control';
+import { ServerStyleSheet } from 'styled-components';
 import { renderToString } from 'react-dom/server';
+import { AppContainer } from 'react-hot-loader';
+import { StaticRouter } from 'react-router';
+import Helmet from 'react-helmet';
+import { head, main, footer } from './template';
+import Root from '../components/Root';
 
-const assets = require(process.env.RAZZLE_ASSETS_MANIFEST);
+const clientAssets = require(process.env.RAZZLE_ASSETS_MANIFEST);; // eslint-disable-line import/no-dynamic-require
+const app = express();
 
-const server = express();
-server
-  .disable('x-powered-by')
-  .use(express.static(process.env.RAZZLE_PUBLIC_DIR))
-  .get('/*', (req, res) => {
-    const context = {};
-    const markup = renderToString(
-      <StaticRouter context={context} location={req.url}>
-        <App />
+// Remove annoying Express header addition.
+app.disable('x-powered-by');
+
+// Compress (gzip) assets in production.
+app.use(compression());
+
+// Add caching to the app
+app.use(cache({
+  '/*.html': 0, // Do not cache the index.html since the js file names change
+  '/*.js': 31536000,
+  '/*.css': 31536000,
+  '/*.(jpg|jpeg|png|gif|JPG|JPEG|PNG|GIF)': 31536000,
+}));
+
+// Setup the public directory so that we can server static assets.
+app.use(express.static(process.env.RAZZLE_PUBLIC_DIR));
+
+app.get('/robots.txt', async (req, res) => {
+  const url = 'https://' + req.get('host');
+  res.type('text/plain');
+  res.send(`# robots.txt\n\nUser-agent: *\nAllow: *\nSitemap: ${url}/sitemap.xml`);
+});
+
+/**
+ * We wrap the React middleware inside a wrap function, so async error don't fail silently
+ * but are shown on the page.
+ *
+ * @see https://strongloop.com/strongblog/async-error-handling-expressjs-es7-promises-generators/
+ *
+ * TODO: Create fallback middleware that shows nice error page
+ */
+let wrap = fn => (...args) => fn(...args).catch(args[2])
+
+// Setup server side routing.
+app.get('*', wrap(async (req, res) => {
+  res.type('text/html');
+
+  const context= {};
+
+  const ServerRoot = (
+    <AppContainer>
+      <StaticRouter location={req.url} context={context}>
+        <Root />
       </StaticRouter>
-    );
+    </AppContainer>
+  );
 
-    if (context.url) {
-      res.redirect(context.url);
-    } else {
-      res.status(200).send(
-        `<!doctype html>
-    <html lang="">
-    <head>
-        <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
-        <meta charSet='utf-8' />
-        <title>Welcome to Razzle</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        ${assets.client.css
-          ? `<link rel="stylesheet" href="${assets.client.css}">`
-          : ''}
-        ${process.env.NODE_ENV === 'production'
-          ? `<script src="${assets.client.js}" defer></script>`
-          : `<script src="${assets.client.js}" defer crossorigin></script>`}
-    </head>
-    <body>
-        <div id="root">${markup}</div>
-    </body>
-</html>`
-      );
-    }
-  });
+  const sheet = new ServerStyleSheet();
+  const root = renderToString(sheet.collectStyles(ServerRoot));
 
-export default server;
+  const helmet = Helmet.renderStatic();
+
+  res.write(head({
+    helmet,
+    stylesheet: sheet.getStyleTags(),
+    fonts: [],
+  }));
+
+  res.write(main({
+    root,
+    helmet,
+  }));
+
+  res.flush();
+
+  res.write(footer({
+    mainJSBundle: clientAssets.client.js,
+  }));
+
+  res.end();
+}));
+
+export default app;
