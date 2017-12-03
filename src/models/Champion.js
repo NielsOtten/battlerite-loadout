@@ -11,6 +11,12 @@ const Schema = mongoose.Schema({
   description: {
     type: String,
   },
+  image: {
+    type: String,
+  },
+  thumbnail: {
+    type: String,
+  },
   abilities: [{
     type: mongoose.Schema.ObjectId,
     ref: 'Ability',

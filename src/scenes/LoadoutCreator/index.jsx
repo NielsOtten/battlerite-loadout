@@ -1,11 +1,51 @@
-import React from 'react';
+import React, { Component } from 'react';
+import fetch from 'fetch-everywhere';
+import RiteSelector from './RiteSelector';
+import ChampionSelector from './ChampionSelector';
 
-const LoadoutCreator = () => {
-  return (
-    <div>
-      Loadout Creator
-    </div>
-  )
-};
+class LoadoutCreatorScene extends Component {
+  state = {
+    championList: [],
+    // riteList: [],
+    champion: null,
+    // rite: [],
+  };
 
-export default LoadoutCreator;
+
+  componentDidMount() {
+    this.getChampions();
+  }
+
+  // async getRites(championId) {
+  //   const response = await fetch(`/api/champion/rites/${championId}`);
+  //   const riteList = await response.json();
+  //   this.setState({ riteList });
+  // }
+
+  async getChampions() {
+    const response = await fetch('/api/champion/list');
+    const championList = await response.json();
+    this.setState({ championList });
+  }
+
+  selectChampion = (id) => {
+    const champion = this.state.championList.filter(obj => obj._id === id)[0];
+    this.setState({ champion });
+  };
+
+  render() {
+    return (
+      <div>
+        {this.state.championList.length > 0 &&
+        this.state.champion === null &&
+        <ChampionSelector
+          championList={this.state.championList}
+          selectChampion={this.selectChampion}
+        />}
+        {this.state.champion && <RiteSelector />}
+      </div>
+    );
+  }
+}
+
+export default LoadoutCreatorScene;

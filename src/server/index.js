@@ -4,13 +4,16 @@ import express from 'express';
 import compression from 'compression';
 import mongoose from 'mongoose';
 import cache from 'cache-control';
+import bodyParser from 'body-parser';
 import { ServerStyleSheet } from 'styled-components';
 import { renderToString } from 'react-dom/server';
 import { AppContainer } from 'react-hot-loader';
 import { StaticRouter } from 'react-router';
 import Helmet from 'react-helmet';
+import api from './api';
 import { head, main, footer } from './template';
 import Root from '../components/Root';
+import Champion from '../models/Champion';
 
 const clientAssets = require(process.env.RAZZLE_ASSETS_MANIFEST);; // eslint-disable-line import/no-dynamic-require
 const app = express();
@@ -26,6 +29,12 @@ app.disable('x-powered-by');
 
 // Compress (gzip) assets in production.
 app.use(compression());
+
+// Add bodyParser for json.
+app.use(bodyParser.urlencoded({
+  extended: true,
+}));
+app.use(bodyParser.json());
 
 // Add caching to the app
 app.use(cache({
@@ -43,6 +52,9 @@ app.get('/robots.txt', async (req, res) => {
   res.type('text/plain');
   res.send(`# robots.txt\n\nUser-agent: *\nAllow: *\nSitemap: ${url}/sitemap.xml`);
 });
+
+// Setup api routes.
+app.use('/api', api);
 
 /**
  * We wrap the React middleware inside a wrap function, so async error don't fail silently
