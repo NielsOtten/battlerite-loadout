@@ -16,6 +16,7 @@
     "express": "^4.16.2",
     "fetch-everywhere": "^1.0.5",
     "mongoose": "^4.13.5",
+    "mongoose-history": "^0.4.2",
     "mongoose-unique-validator": "^1.0.6",
     "prop-types": "^15.6.0",
     "raf": "^3.4.0",

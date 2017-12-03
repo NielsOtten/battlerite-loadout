@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import uniqueValidator from 'mongoose-unique-validator';
+import mongooseHistory from 'mongoose-history';
 import { isHexColor } from 'validator';
 import errorMessages from '../common/errorMessages';
 
@@ -33,5 +34,6 @@ const Schema = mongoose.Schema({
 });
 
 Schema.plugin(uniqueValidator);
+Schema.plugin(mongooseHistory);
 
 export default mongoose.model('Rite', Schema);

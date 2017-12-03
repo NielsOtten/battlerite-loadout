@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import uniqueValidator from 'mongoose-unique-validator';
+import mongooseHistory from 'mongoose-history';
 import errorMessages from '../common/errorMessages';
 
 const Schema = mongoose.Schema({
@@ -28,5 +29,6 @@ const Schema = mongoose.Schema({
 });
 
 Schema.plugin(uniqueValidator);
+Schema.plugin(mongooseHistory);
 
 export default mongoose.model('Champion', Schema);

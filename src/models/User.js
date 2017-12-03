@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import mongooseHistory from 'mongoose-history';
 import errorMessages from '../common/errorMessages';
 
 const Schema = mongoose.Schema({
@@ -8,5 +9,7 @@ const Schema = mongoose.Schema({
     unique: errorMessages.UNIQUE_ERROR,
   },
 });
+
+Schema.plugin(mongooseHistory);
 
 export default mongoose.model('User', Schema);
