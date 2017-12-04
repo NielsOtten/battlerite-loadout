@@ -6,7 +6,7 @@ import ChampionSelector from './ChampionSelector';
 class LoadoutCreatorScene extends Component {
   state = {
     championList: [],
-    // riteList: [],
+    riteList: [],
     champion: null,
     // rite: [],
   };
@@ -16,11 +16,11 @@ class LoadoutCreatorScene extends Component {
     this.getChampions();
   }
 
-  // async getRites(championId) {
-  //   const response = await fetch(`/api/champion/rites/${championId}`);
-  //   const riteList = await response.json();
-  //   this.setState({ riteList });
-  // }
+  async getRites(championId) {
+    const response = await fetch(`/api/champion/${championId}/rites/`);
+    const riteList = await response.json();
+    this.setState({ riteList });
+  }
 
   async getChampions() {
     const response = await fetch('/api/champion/list');
@@ -30,6 +30,7 @@ class LoadoutCreatorScene extends Component {
 
   selectChampion = (id) => {
     const champion = this.state.championList.filter(obj => obj._id === id)[0];
+    this.getRites(champion._id);
     this.setState({ champion });
   };
 
@@ -42,7 +43,11 @@ class LoadoutCreatorScene extends Component {
           championList={this.state.championList}
           selectChampion={this.selectChampion}
         />}
-        {this.state.champion && <RiteSelector />}
+        {this.state.champion &&
+        this.state.riteList.length > 0 &&
+        <RiteSelector
+          riteList={this.state.riteList}
+        />}
       </div>
     );
   }

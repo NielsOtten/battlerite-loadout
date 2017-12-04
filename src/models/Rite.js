@@ -1,13 +1,10 @@
 import mongoose from 'mongoose';
 import uniqueValidator from 'mongoose-unique-validator';
-import mongooseHistory from 'mongoose-history';
-import { isHexColor } from 'validator';
 import errorMessages from '../common/errorMessages';
 
 const Schema = mongoose.Schema({
   name: {
     type: String,
-    unique: errorMessages.UNIQUE_ERROR,
     required: `Name ${errorMessages.REQUIRED_ERROR}.`,
   },
   type: {
@@ -18,22 +15,16 @@ const Schema = mongoose.Schema({
     type: String,
     required: `Description ${errorMessages.REQUIRED_ERROR}.`,
   },
-  color: {
+  image: {
     type: String,
-    required: `Color ${errorMessages.REQUIRED_ERROR}.`,
-    validate: {
-      isAsync: true,
-      validator: isHexColor,
-      message: `${errorMessages.VALIDATE_ERROR} hex color.`,
-    },
+    required: errorMessages.REQUIRED_ERROR,
   },
-  ability: {
+  champion: {
     type: mongoose.Schema.ObjectId,
-    ref: 'Ability',
+    ref: 'Champion',
   },
 });
 
 Schema.plugin(uniqueValidator);
-Schema.plugin(mongooseHistory);
 
 export default mongoose.model('Rite', Schema);

@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import mongooseHistory from 'mongoose-history';
 import errorMessages from '../common/errorMessages';
 
 function arrayLimit(val) {
@@ -26,7 +25,5 @@ const Schema = mongoose.Schema({
     validate: [arrayLimit, '{PATH} exceeds the limit of 5.'],
   },
 });
-
-Schema.plugin(mongooseHistory);
 
 export default mongoose.model('Loadout', Schema);

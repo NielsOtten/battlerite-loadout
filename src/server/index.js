@@ -19,7 +19,6 @@ const clientAssets = require(process.env.RAZZLE_ASSETS_MANIFEST);; // eslint-dis
 const app = express();
 
 const mongoURL = process.env.MONGODB_URI || 'mongodb://localhost/battlerite';
-mongoose.Promise = global.Promise;
 mongoose.connect(mongoURL, { useMongoClient: true }, (ignore, connection) => {
   connection.onOpen();
 }).then(() => { console.info('connected'); }).catch(console.error);

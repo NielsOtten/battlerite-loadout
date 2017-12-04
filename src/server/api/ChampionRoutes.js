@@ -12,7 +12,7 @@ router.get('/list', async (req, res) => {
   return res.json(champions);
 });
 
-router.get('/rites/:champion', async (req, res) => {
+router.get('/:id/rites', async (req, res) => {
   const { id } = req.params;
   const rites = await Rite.find({ champion: id });
   return res.json(rites);
